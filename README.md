@@ -9,9 +9,7 @@ A terminal-based dungeon RPG built from scratch in C++. It was originally a univ
 This project features a fully functional grid system for the map, RPG mechanics like skills, spells and more, and persistent JSON save states, all rendering directly inside standard console environments.
 
 ## 🎮 Gameplay Demo
-*(a gif placeholder that ill put in a couple of minutes)*
-
-`![Gameplay Demo](docs/gameplay.gif)`
+![Gameplay Demo](demo.gif)
 
 ## ✨ Core Engineering Features
 * **Custom OOP Architecture:** Being an OOP project, I went all out in making a complex architecture between different classes, like an entity class tree, an item class tree, a grid related class tree and so on.
