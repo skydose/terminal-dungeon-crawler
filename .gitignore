@@ -1,0 +1,15 @@
+# CMake build directories
+build/
+bin/
+
+# Compiled object files and executables
+*.o
+*.exe
+*.out
+
+# Save files
+saves/
+
+# OS generated files
+.DS_Store
+Thumbs.db
