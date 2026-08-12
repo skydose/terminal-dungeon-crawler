@@ -1,0 +1,483 @@
+@startuml
+
+/' Styling to make the diagram look modern and compact '/
+skinparam classAttributeIconSize 0
+skinparam monochrome true
+skinparam shadowing false
+hide empty members
+
+/' Objects '/
+
+class ActiveSkill {
+	-effect : StatModifier
+	-staminaCost : int
+	+activate(Player* target) : void
+}
+
+class Armor {
+	#baseDefense : int
+}
+
+class Axe {
+	-cleaveBonus : int
+}
+
+class BattleManager {
+	-enemies : DynamicArray<Enemy*>
+	-player : Player*
+	-active : bool
+	+calculateFinalDamage(Entity* attacker, Entity* target) : int
+	+processTurn() : void
+	+startBattle(Player* player, DynamicArray<Enemy*>& enemies) : void
+}
+
+class Boss {
+	-chargeCounter : int
+	-phase : int
+	+decideAction() : int
+	+takeTurn(Entity* target) : void
+	+triggerSpecial() : void
+}
+
+class ChainMail {
+	-linkedRings : int
+}
+
+class CombatRoom {
+	-doorPos : Coordinate
+	-localPlayer : Coordinate
+	-enemies : Enemy**
+	-floorLoot : Item**
+	-numEnemies : int
+	+enter(Player* player) : void
+	+interact(Player* player) : void
+}
+
+class CombatRules {
+	+{static} baseCritBonus : float
+	+{static} dodgeChance : float
+	+{static} maxRounds : int
+}
+
+abstract class Consumable {
+	+{abstract} use(Player* target) : void
+}
+
+class Dagger {
+	-poisonChance : int
+}
+
+class DamagePotion {
+	-damageBuffAmount : int
+	+use(Player* target) : void
+}
+
+class DamageSpell {
+	-statusType : StatusType
+	-causesStatus : bool
+	-damage : int
+	-statusDuration : int
+	-statusTickValue : int
+	+cast(Entity* caster, Entity* target) : void
+	+effect(Entity*, Entity* target) : void
+}
+
+class DefensePotion {
+	-defenseBuffAmount : int
+	+use(Player* target) : void
+}
+
+class DropEntry {
+	+item : Item*
+	+chance : float
+}
+
+class DynamicArray <template<typename T>> {
+	-array : T*
+	-capacity : int
+	-currentSize : int
+	+clear() : void
+	+insert(int pos, const T& value) : void
+	+removeAt(int index) : void
+	+resize() : void
+	+size() : int
+}
+
+class EmptyRoom {
+	-doorPos : Coordinate
+	-localPlayer : Coordinate
+	+interact(Player* player) : void
+}
+
+abstract class Enemy {
+	#lootTable : LootTable*
+	#activeModifiers : StatModifier*
+	#activeEffects : StatusEffect*
+	+{abstract} decideAction() : int
+	+addStatusEffect(StatusEffect effect) : void
+	+applyModifier(StatModifier mod) : void
+	+processStatusEffects() : void
+	+takeDamage(int amount) : void
+	+{abstract} takeTurn(Entity* target) : void
+	+dropLoot() : LootBundle
+}
+
+abstract class Entity {
+	#name : std::string
+	#level : int
+	#currentHP : int
+	#maxHP : int
+	#critRate : float
+	#critMultiplier : float
+	#hpBar : HealthBar
+	+isDead() : bool
+	+takeDamage(int amount) : void
+	+{abstract} takeTurn(Entity* target) : void
+}
+
+abstract class Equippable {
+	#durability : int
+	#maxDurability : int
+	+isBroken() : bool
+	+degrade(int amount) : void
+	+repair(int amount) : void
+	+{abstract} onEquip(Player* target) : void
+	+{abstract} onUnequip(Player* target) : void
+	+{abstract} onHit() : void
+}
+
+class GameState {
+	-map : MapGrid*
+	-player : Player*
+	+cleanup() : void
+	+load(int slot) : bool
+	+save(int slot) : void
+}
+
+class Goblin {
+	-stealthChance : float
+	+decideAction() : int
+	+takeTurn(Entity* target) : void
+}
+
+class Grid <template<typename T>> {
+	-cells : T**
+	-height : int
+	-width : int
+	+get(int x, int y) : T
+	+set(int x, int y, T item) : void
+}
+
+class HealingSpell {
+	-healAmount : int
+	+cast(Entity* caster, Entity* target) : void
+	+effect(Entity*, Entity* target) : void
+}
+
+class HealthBar {
+	-current : int
+	-max : int
+	+getVisual(int length, std::string colorCode) : std::string
+	+update(int currentHP, int maxHP) : void
+}
+
+class HealthPotion {
+	-healAmount : int
+	+use(Player* target) : void
+}
+
+class InputManager {
+	+{static} getChar() : char
+	+{static} pause() : void
+}
+
+class Inventory {
+	-items : DynamicArray<Item*>
+	-capacity : int
+	+addItem(Item* item) : bool
+	+removeItem(int index) : void
+	+display() : void
+}
+
+abstract class Item {
+	#name : std::string
+	#value : int
+	+{abstract} getType() : std::string
+	+{abstract} use(Player* target) : void
+}
+
+class ItemRules {
+	+{static} DEFAULT_SELL_RATIO : float
+	+{static} MAX_INVENTORY_SLOTS : int
+	+{static} MAX_STACK_SIZE : int
+}
+
+class Knight {
+	-blockChance : float
+	+decideAction() : int
+	+takeTurn(Entity* target) : void
+}
+
+class LootBundle {
+	+items : DynamicArray<Item*>
+	+gold : int
+	+xp : int
+}
+
+class LootTable {
+	-entries : DropEntry*
+	-capacity : int
+	-numEntries : int
+	+roll() : LootBundle
+	+addEntry(Item* item, float chance) : bool
+}
+
+class MagicRules {
+	+{static} statusChance : float
+	+{static} baseManaRegen : int
+}
+
+class ManaPotion {
+	-restoreAmount : int
+	+use(Player* target) : void
+}
+
+class MapGrid {
+	-playerPosition : Coordinate
+	-rooms : Grid<Room*>
+	-height : int
+	-width : int
+	+move(int dx, int dy, Player* player) : bool
+	+render() : void
+	+setRoom(int x, int y, Room* room) : void
+}
+
+class Material {
+	-type : MaterialType
+}
+
+class PassiveSkill {
+	-modifier : StatModifier
+	+activate(Player* target) : void
+}
+
+class PlateArmor {
+	-weightPenalty : float
+}
+
+class Player {
+	-equippedArmor : Armor*
+	-equippedWeapon : Weapon*
+	-inventory : Inventory*
+	-spellbook : Spellbook*
+	-unlockedSkills : DynamicArray<Skill*>
+	-activeModifiers : DynamicArray<StatModifier>
+	-gold : int
+	-mana : int
+	-xp : int
+	+attack(Entity* target) : void
+	+castSpell(int index, Entity* target) : void
+	+equip(Equippable* item) : void
+	+useItem(int index) : void
+	+takeDamage(int amount) : void
+	+takeTurn(Entity*) : void
+}
+
+abstract class Room {
+	#narrativeText : string
+	#roomType : string
+	#isCleared : bool
+	+enter(Player*) : void
+	+{abstract} interact(Player* player) : void
+}
+
+class SaveRoom {
+	-doorPos : Coordinate
+	-localPlayer : Coordinate
+	-store : Store*
+	+interact(Player* player) : void
+}
+
+class ScalingSkill {
+	-baseModifier : StatModifier
+	-multiplier : float
+	+activate(Player* target) : void
+}
+
+abstract class Skill {
+	#name : std::string
+	#requiredLevel : int
+	+{abstract} getType() : std::string
+	+{abstract} activate(Player* target) : void
+}
+
+class SkillManager {
+	-skills : Skill**
+	-capacity : int
+	-numSkills : int
+	+learnSkill(Skill* skill) : bool
+	+unlock(Player* player, int id) : bool
+	+showSkills() : void
+}
+
+class SkillRules {
+	+{static} defaultSkillCapacity : int
+	+{static} maxSkillPoints : int
+	+{static} maxUnlockedSkills : int
+}
+
+abstract class Spell {
+	#name : std::string
+	#manaCost : int
+	+{abstract} cast(Entity* caster, Entity* target) : void
+	+{abstract} effect(Entity* caster, Entity* target) : void
+}
+
+class Spellbook {
+	-spells : DynamicArray<Spell*>
+	+addSpell(Spell* s) : void
+	+removeSpell(int index) : void
+	+viewSpells() : void
+}
+
+class StatModifier {
+	+stat : StatType
+	+duration : int
+	+value : int
+}
+
+class StatusEffect {
+	-type : StatusType
+	+duration : int
+	-tickValue : int
+	+apply(Entity* target) : void
+	+tick(Entity* target) : void
+}
+
+class Store {
+	-storeInventory : Item**
+	-capacity : int
+	-numStoreItems : int
+	+buy(Player* player, int itemIndex) : void
+	+sell(Player* player, int itemIndex) : void
+	+stockItem(Item* item) : void
+	+openInterface(Player* player) : void
+}
+
+class Sword {
+	-lifeStealRatio : float
+}
+
+class Weapon {
+	#baseDamage : int
+	+onEquip(Player* target) : void
+	+onHit() : void
+	+onUnequip(Player* target) : void
+}
+
+class WorldGenerator {
+	+generateMap(int w, int h) : MapGrid*
+	+createStockedStore() : Store*
+	+placeRooms(MapGrid* map) : void
+}
+
+class WorldRules {
+	+{static} mapHeight : int
+	+{static} mapWidth : int
+	+{static} worldSeed : int
+}
+
+enum MaterialType {
+	CRYSTAL
+	IRON
+	WOOD
+}
+
+enum StatType {
+	DAMAGE
+	DEFENSE
+	NONE
+}
+
+enum StatusType {
+	BURN
+	FREEZE
+	POISON
+}
+
+class Coordinate {
+	+x : int
+	+y : int
+}
+
+
+/' Inheritance relationships '/
+
+Armor <|-- ChainMail
+Armor <|-- PlateArmor
+Consumable <|-- DamagePotion
+Consumable <|-- DefensePotion
+Consumable <|-- HealthPotion
+Consumable <|-- ManaPotion
+Enemy <|-- Boss
+Enemy <|-- Goblin
+Enemy <|-- Knight
+Entity <|-- Enemy
+Entity <|-- Player
+Equippable <|-- Armor
+Equippable <|-- Weapon
+Item <|-- Consumable
+Item <|-- Equippable
+Item <|-- Material
+Room <|-- CombatRoom
+Room <|-- EmptyRoom
+Room <|-- SaveRoom
+Skill <|-- ActiveSkill
+Skill <|-- PassiveSkill
+Skill <|-- ScalingSkill
+Spell <|-- DamageSpell
+Spell <|-- HealingSpell
+Weapon <|-- Axe
+Weapon <|-- Dagger
+Weapon <|-- Sword
+
+
+/' Aggregation & Composition relationships '/
+
+ActiveSkill *-- StatModifier
+BattleManager *-- DynamicArray
+BattleManager o-- Player
+CombatRoom "2" *-- Coordinate
+CombatRoom o-- Enemy
+CombatRoom o-- Item
+DamageSpell *-- StatusType
+DropEntry o-- Item
+EmptyRoom "2" *-- Coordinate
+Enemy o-- LootTable
+Enemy o-- StatModifier
+Enemy o-- StatusEffect
+Entity *-- HealthBar
+GameState o-- MapGrid
+GameState o-- Player
+Inventory *-- DynamicArray
+LootBundle *-- DynamicArray
+LootTable o-- DropEntry
+MapGrid *-- Coordinate
+MapGrid *-- Grid
+Material *-- MaterialType
+PassiveSkill *-- StatModifier
+Player o-- Armor
+Player "2" *-- DynamicArray
+Player o-- Inventory
+Player o-- Spellbook
+Player o-- Weapon
+SaveRoom "5" *-- Coordinate
+SaveRoom o-- Store
+ScalingSkill *-- StatModifier
+SkillManager o-- Skill
+Spellbook *-- DynamicArray
+StatModifier *-- StatType
+StatusEffect *-- StatusType
+Store o-- Item
+
+@enduml

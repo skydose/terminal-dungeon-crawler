@@ -1,0 +1,2273 @@
+@startuml
+
+
+
+
+
+
+
+
+
+
+
+/' Objects '/
+
+
+
+class ActiveSkill {
+
++ActiveSkill()
+
++ActiveSkill(std::string name, int requiredLevel, int staminaCost, StatModifier effect)
+
+-effect : StatModifier
+
++getEffect() : StatModifier {query}
+
++getStaminaCost() : int {query}
+
+-staminaCost : int
+
++getType() : std::string {query}
+
++activate(Player* target) : void
+
++deserialize(const json& j) : void
+
++serialize(json& j) : void {query}
+
++setEffect(StatModifier effect) : void
+
++setStaminaCost(int staminaCost) : void
+
+}
+
+
+
+
+
+class Armor {
+
++Armor(const std::string& n, int def, int val, int maxDur)
+
++Armor(const Armor& other)
+
+#baseDefense : int
+
++getBaseDefense() : int {query}
+
++getType() : std::string {query}
+
++deserialize(const json& j) : void
+
++onEquip(Player* target) : void
+
++onHit() : void
+
++onUnequip(Player* target) : void
+
++serialize(json& j) : void {query}
+
++setBaseDefense(int d) : void
+
+}
+
+
+
+
+
+class Axe {
+
++Axe(const std::string& name, int baseDamage, int cleaveBonus, int value)
+
++Axe(const Axe& other)
+
+-cleaveBonus : int
+
++getCleaveBonus() : int {query}
+
++getType() : std::string {query}
+
++deserialize(const json& j) : void
+
++onHit() : void
+
++serialize(json& j) : void {query}
+
+}
+
+
+
+
+
+class BattleManager {
+
+-BattleManager()
+
++~BattleManager()
+
++{static} getInstance() : BattleManager*
+
+-enemies : DynamicArray<Enemy*>
+
++getCombatants() : DynamicArray<Enemy*>&
+
+-selectTarget() : Enemy*
+
++selectTarget(DynamicArray<Enemy*>& enemies) : Enemy*
+
++getPrimaryPlayer() : Player* {query}
+
+-player : Player*
+
+-active : bool
+
++isBattleActive() : bool {query}
+
++calculateFinalDamage(Entity* attacker, Entity* target) : int
+
+-{static} instance : static BattleManager*
+
++processTurn() : void
+
+-renderBattleScreen(Player* player, DynamicArray<Enemy*>& enemies, std::string message) : void
+
++setBattleActive(bool state) : void
+
++setPrimaryPlayer(Player* p) : void
+
++startBattle(Player* player, DynamicArray<Enemy*>& enemies) : void
+
+}
+
+
+
+
+
+class Boss {
+
++Boss()
+
++~Boss()
+
+-chargeCounter : int
+
++decideAction() : int
+
++getChargeCounter() : int {query}
+
++getPhase() : int {query}
+
+-phase : int
+
++deserialize(const json& j) : void
+
++serialize(json& j) : void {query}
+
++setChargeCounter(int c) : void
+
++setPhase(int p) : void
+
++takeTurn(Entity* target) : void
+
++triggerSpecial() : void
+
+}
+
+
+
+
+
+class ChainMail {
+
++ChainMail(const std::string& name, int baseDefense, int linkedRings, int value)
+
++ChainMail(const ChainMail& other)
+
++getLinkedRings() : int {query}
+
+-linkedRings : int
+
++getType() : std::string {query}
+
++deserialize(const json& j) : void
+
++onEquip(Player* target) : void
+
++serialize(json& j) : void {query}
+
+}
+
+
+
+
+
+class CombatRoom {
+
++CombatRoom(string text, Enemy** enemyGroup, int groupSize)
+
++~CombatRoom()
+
+-doorPos : Coordinate
+
+-localPlayer : Coordinate
+
+-enemies : Enemy**
+
+-floorLoot : Item**
+
+-currentEnemyIndex : int
+
+-floorCapacity : int
+
+-numEnemies : int
+
+-numFloorItems : int
+
+-roomHeight : int
+
+-roomWidth : int
+
+-collectFloorLoot(Player* player) : void
+
++deserialize(const json& j) : void
+
++enter(Player* player) : void
+
++interact(Player* player) : void
+
+-render() : void
+
++serialize(json& j) : void {query}
+
+}
+
+
+
+
+
+class CombatRules {
+
++{static} baseCritBonus : static float
+
++{static} dodgeChance : static float
+
++{static} maxRounds : static int
+
+}
+
+
+
+
+
+abstract class Consumable {
+
++Consumable(const std::string& name, int value)
+
++Consumable(const Consumable& other)
+
++~Consumable()
+
++deserialize(const json& j) : void
+
++serialize(json& j) : void {query}
+
++{abstract} use(Player* target) : void
+
+}
+
+
+
+
+
+class Dagger {
+
++Dagger(const std::string& name, int baseDamage, int poisonChance, int value)
+
++Dagger(const Dagger& other)
+
++getPoisonChance() : int {query}
+
+-poisonChance : int
+
++getType() : std::string {query}
+
++deserialize(const json& j) : void
+
++onHit() : void
+
++serialize(json& j) : void {query}
+
+}
+
+
+
+
+
+class DamagePotion {
+
++DamagePotion(int damageBuffAmount, int value)
+
++DamagePotion(const DamagePotion& other)
+
+-damageBuffAmount : int
+
++getDamageBuffAmount() : int {query}
+
++getType() : std::string {query}
+
++deserialize(const json& j) : void
+
++serialize(json& j) : void {query}
+
++use(Player* target) : void
+
+}
+
+
+
+
+
+class DamageSpell {
+
++DamageSpell(std::string n, int m, int d, bool hasStatus, StatusType sType, int sDur, int sTick)
+
+-statusType : StatusType
+
+-causesStatus : bool
+
+-damage : int
+
+-statusDuration : int
+
+-statusTickValue : int
+
++cast(Entity* caster, Entity* target) : void
+
++deserialize(const json& j) : void
+
++effect(Entity*, Entity* target) : void
+
++serialize(json& j) : void {query}
+
+}
+
+
+
+
+
+class DefensePotion {
+
++DefensePotion(int defenseBuffAmount, int value)
+
++DefensePotion(const DefensePotion& other)
+
+-defenseBuffAmount : int
+
++getDefenseBuffAmount() : int {query}
+
++getType() : std::string {query}
+
++deserialize(const json& j) : void
+
++serialize(json& j) : void {query}
+
++use(Player* target) : void
+
+}
+
+
+
+
+
+class DropEntry {
+
++DropEntry()
+
++DropEntry(Item* item, float chance)
+
++item : Item*
+
++chance : float
+
++setChance(float chance) : void
+
++setItem(Item* item) : void
+
+}
+
+
+
+
+
+class DynamicArray <template<typename T>> {
+
++DynamicArray()
+
++DynamicArray(const DynamicArray& other)
+
++~DynamicArray()
+
++operator=(const DynamicArray& other) : DynamicArray&
+
++operator[](int i) : T&
+
++operator[](int i) : T& {query}
+
+-array : T*
+
++data() : T*
+
++data() : T* {query}
+
++empty() : bool {query}
+
+-capacity : int
+
+-currentSize : int
+
++size() : int {query}
+
++clear() : void
+
++erase(int index) : void
+
++insert(int pos, const T& value) : void
+
++pop_back() : void
+
++push_back(const T& value) : void
+
++removeAt(int index) : void
+
++resize() : void
+
++shrink_to_fit() : void
+
++swap(DynamicArray<T>& other) : void
+
+}
+
+
+
+
+
+class EmptyRoom {
+
++EmptyRoom(std::string narrative)
+
++~EmptyRoom()
+
+-doorPos : Coordinate
+
+-localPlayer : Coordinate
+
+-roomHeight : int
+
+-roomWidth : int
+
++interact(Player* player) : void
+
+-render() : void
+
+}
+
+
+
+
+
+abstract class Enemy {
+
++Enemy()
+
++~Enemy()
+
++dropLoot() : LootBundle
+
++getLootTable() : LootTable* {query}
+
+#lootTable : LootTable*
+
+#activeModifiers : StatModifier*
+
+#activeEffects : StatusEffect*
+
++getActiveEffects() : StatusEffect* {query}
+
++{abstract} decideAction() : int
+
+#effectCapacity : int
+
++getEffectCapacity() : int {query}
+
++getNumEffects() : int {query}
+
+#modifierCapacity : int
+
+#numEffects : int
+
+#numModifiers : int
+
++addStatusEffect(StatusEffect effect) : void
+
++applyModifier(StatModifier mod) : void
+
++deserialize(const json& j) : void
+
++processStatusEffects() : void
+
++serialize(json& j) : void {query}
+
++setActiveEffects(StatusEffect* effects) : void
+
++setEffectCapacity(int capacity) : void
+
++setLootTable(LootTable* lt) : void
+
++setNumEffects(int num) : void
+
++takeDamage(int amount) : void
+
++{abstract} takeTurn(Entity* target) : void
+
+}
+
+
+
+
+
+abstract class Entity {
+
++Entity()
+
++~Entity()
+
+#hpBar : HealthBar
+
++isDead() : bool {query}
+
+#critMultiplier : float
+
+#critRate : float
+
++getCritMultiplier() : float {query}
+
++getCritRate() : float {query}
+
++calculateDamage(int base) : int {query}
+
+#currentHP : int
+
++getHP() : int {query}
+
++getLevel() : int {query}
+
++getMaxHP() : int {query}
+
+#level : int
+
+#maxHP : int
+
++{static} totalEntities : static int
+
++operator<<(std::ostream& os, const Entity& e) : std :: ostream&
+
++getHealthBar(int length, std::string colorCode) : std::string {query}
+
++getName() : std::string {query}
+
+#name : std::string
+
++deserialize(const json& j) : void
+
++serialize(json& j) : void {query}
+
++setCritMultiplier(float mult) : void
+
++setCritRate(float rate) : void
+
++setCurrentHP(int hp) : void
+
++setLevel(int lvl) : void
+
++setMaxHP(int hp) : void
+
++setName(const std::string& n) : void
+
++takeDamage(int amount) : void
+
++{abstract} takeTurn(Entity* target) : void
+
+}
+
+
+
+
+
+abstract class Equippable {
+
++Equippable(const std::string& name, int value, int maxDurability)
+
++Equippable(const Equippable& other)
+
++~Equippable()
+
++isBroken() : bool {query}
+
+#durability : int
+
++getDurability() : int {query}
+
++getMaxDurability() : int {query}
+
+#maxDurability : int
+
++degrade(int amount) : void
+
++deserialize(const nlohmann::json& j) : void
+
++{abstract} onEquip(Player* target) : void
+
++{abstract} onHit() : void
+
++{abstract} onUnequip(Player* target) : void
+
++repair(int amount) : void
+
++serialize(nlohmann::json& j) : void {query}
+
++use(Player*) : void
+
+}
+
+
+
+
+
+class GameState {
+
+-GameState()
+
++~GameState()
+
++{static} getInstance() : GameState*
+
++getMap() : MapGrid*
+
+-map : MapGrid*
+
++getPlayer() : Player*
+
+-player : Player*
+
++load(int slot) : bool
+
+-{static} instance : static GameState*
+
++cleanup() : void
+
++save(int slot) : void
+
++setMap(MapGrid* m) : void
+
++setPlayer(Player* p) : void
+
+}
+
+
+
+
+
+class Goblin {
+
++Goblin()
+
++~Goblin()
+
++getStealthChance() : float {query}
+
+-stealthChance : float
+
++decideAction() : int
+
++deserialize(const json& j) : void
+
++serialize(json& j) : void {query}
+
++setStealthChance(float chance) : void
+
++takeTurn(Entity* target) : void
+
+}
+
+
+
+
+
+class Grid <template<typename T>> {
+
++Grid(int w, int h)
+
++~Grid()
+
++get(int x, int y) : T {query}
+
+-cells : T**
+
++getHeight() : int {query}
+
++getWidth() : int {query}
+
+-height : int
+
+-width : int
+
++set(int x, int y, T item) : void
+
+}
+
+
+
+
+
+class HealingSpell {
+
++HealingSpell(std::string n, int m, int h)
+
+-healAmount : int
+
++cast(Entity* caster, Entity* target) : void
+
++deserialize(const json& j) : void
+
++effect(Entity*, Entity* target) : void
+
++serialize(json& j) : void {query}
+
+}
+
+
+
+
+
+class HealthBar {
+
++HealthBar()
+
+-current : int
+
+-max : int
+
++getVisual(int length, std::string colorCode) : std::string {query}
+
++update(int currentHP, int maxHP) : void
+
+}
+
+
+
+
+
+class HealthPotion {
+
++HealthPotion(int healAmount, int value)
+
++HealthPotion(const HealthPotion& other)
+
++getHealAmount() : int {query}
+
+-healAmount : int
+
++getType() : std::string {query}
+
++deserialize(const nlohmann::json& j) : void
+
++serialize(nlohmann::json& j) : void {query}
+
++use(Player* target) : void
+
+}
+
+
+
+
+
+class InputManager {
+
++{static} getChar() : char
+
++{static} pause() : void
+
+}
+
+
+
+
+
+class Inventory {
+
++Inventory(int cap)
+
++~Inventory()
+
+-items : DynamicArray<Item*>
+
++operator+=(Item* item) : Inventory&
+
++getItem(int index) : Item* {query}
+
++addItem(Item* item) : bool
+
++canFit(Item*) : bool {query}
+
+-capacity : int
+
++getCapacity() : int {query}
+
++getNumItems() : int {query}
+
++operator<<(std::ostream& os, const Inventory& inv) : std :: ostream&
+
++deserialize(const json& j) : void
+
++display() : void {query}
+
++removeItem(int index) : void
+
++serialize(json& j) : void {query}
+
+}
+
+
+
+
+
+abstract class Item {
+
++Item(const std::string& name, int value)
+
++Item(const Item& other)
+
++~Item()
+
++operator<(const Item& other) : bool {query}
+
++operator>(const Item& other) : bool {query}
+
++getValue() : int {query}
+
+#value : int
+
++{static} totalItemsCreated : static int
+
++operator<<(std::ostream& os, const Item& item) : std :: ostream&
+
++getName() : std::string {query}
+
++{abstract} getType() : std::string {query}
+
+#name : std::string
+
++deserialize(const nlohmann::json& j) : void
+
++serialize(nlohmann::json& j) : void {query}
+
++setValue(int v) : void
+
++{abstract} use(Player* target) : void
+
+}
+
+
+
+
+
+class ItemRules {
+
++{static} DEFAULT_SELL_RATIO : static const float
+
++{static} MAX_INVENTORY_SLOTS : static const int
+
++{static} MAX_STACK_SIZE : static const int
+
+}
+
+
+
+
+
+class Knight {
+
++Knight()
+
++~Knight()
+
+-blockChance : float
+
++getBlockChance() : float {query}
+
++decideAction() : int
+
++deserialize(const json& j) : void
+
++serialize(json& j) : void {query}
+
++setBlockChance(float chance) : void
+
++takeTurn(Entity* target) : void
+
+}
+
+
+
+
+
+class LootBundle {
+
++LootBundle()
+
++LootBundle(int xp, int gold, int capacity)
+
++LootBundle(int xp, int gold, DynamicArray<Item*> items)
+
++LootBundle(const LootBundle& other)
+
++~LootBundle()
+
++items : DynamicArray<Item*>
+
++getItem(int index) : Item* {query}
+
++operator+=(const LootBundle& other) : LootBundle&
+
++operator=(const LootBundle& other) : LootBundle&
+
++addItem(Item* item) : bool
+
+-capacity : int
+
++getCapacity() : int {query}
+
++gold : int
+
++xp : int
+
++operator<<(std::ostream& out, const LootBundle& bundle) : std :: ostream&
+
+-resize() : void
+
++saveToJson(const std::string& fileName) : void {query}
+
+}
+
+
+
+
+
+class LootTable {
+
++LootTable()
+
++LootTable(int capacity)
+
++LootTable(const LootTable& other)
+
++~LootTable()
+
+-entries : DropEntry*
+
++roll() : LootBundle {query}
+
++rollForLoot() : LootBundle {query}
+
++operator=(const LootTable& other) : LootTable&
+
++addEntry(Item* item, float chance) : bool
+
+-capacity : int
+
++getCapacity() : int {query}
+
++getNumEntries() : int {query}
+
+-maxGold : int
+
+-maxXP : int
+
+-minGold : int
+
+-minXP : int
+
+-numEntries : int
+
+-copyFrom(const LootTable& other) : void
+
+-resize() : void
+
++saveToJson(const std::string& fileName) : void {query}
+
++setGoldRange(int minGold, int maxGold) : void
+
++setXPRange(int minXP, int maxXP) : void
+
+}
+
+
+
+
+
+class MagicRules {
+
++{static} statusChance : static float
+
++{static} baseManaRegen : static int
+
+}
+
+
+
+
+
+class ManaPotion {
+
++ManaPotion(int restoreAmount, int value)
+
++ManaPotion(const ManaPotion& other)
+
++getRestoreAmount() : int {query}
+
+-restoreAmount : int
+
++getType() : std::string {query}
+
++deserialize(const json& j) : void
+
++serialize(json& j) : void {query}
+
++use(Player* target) : void
+
+}
+
+
+
+
+
+class MapGrid {
+
++MapGrid(int w, int h)
+
++~MapGrid()
+
++getPlayerPosition() : Coordinate {query}
+
+-playerPosition : Coordinate
+
+-rooms : Grid<Room*>
+
++move(int dx, int dy, Player* player) : bool
+
+-height : int
+
+-width : int
+
+-clearGrid() : void
+
++deserialize(const json& j) : void
+
++render() : void
+
++serialize(json& j) : void {query}
+
++setRoom(int x, int y, Room* room) : void
+
+}
+
+
+
+
+
+class Material {
+
++Material(const std::string& name, MaterialType type, int value)
+
++Material(const Material& other)
+
+-type : MaterialType
+
++getMaterialType() : int {query}
+
++getType() : std::string {query}
+
+}
+
+
+
+
+
+class PassiveSkill {
+
++PassiveSkill()
+
++PassiveSkill(std::string name, int requiredLevel, StatModifier modifier)
+
++getModifier() : StatModifier {query}
+
+-modifier : StatModifier
+
++getType() : std::string {query}
+
++activate(Player* target) : void
+
++deserialize(const json& j) : void
+
++serialize(json& j) : void {query}
+
++setModifier(StatModifier modifier) : void
+
+}
+
+
+
+
+
+class PlateArmor {
+
++PlateArmor(const std::string& name, int baseDefense, float weightPenalty, int value)
+
++PlateArmor(const PlateArmor& other)
+
++getWeightPenalty() : float {query}
+
+-weightPenalty : float
+
++getType() : std::string {query}
+
++deserialize(const nlohmann::json& j) : void
+
++onEquip(Player* target) : void
+
++serialize(nlohmann::json& j) : void {query}
+
+}
+
+
+
+
+
+class Player {
+
++Player()
+
++~Player()
+
+-equippedArmor : Armor*
+
++getEquippedArmor() : Armor* {query}
+
+-unlockedSkills : DynamicArray<Skill*>
+
+-activeModifiers : DynamicArray<StatModifier>
+
++getInventory() : Inventory* {query}
+
+-inventory : Inventory*
+
++operator+(int healAmount) : Player&
+
++getUnlockedSkill(int index) : Skill* {query}
+
++getSpellbook() : Spellbook* {query}
+
+-spellbook : Spellbook*
+
+-equippedWeapon : Weapon*
+
++getEquippedWeapon() : Weapon* {query}
+
++setMana(int val) : bool
+
++getGold() : int {query}
+
++getLevel() : int {query}
+
++getMana() : int {query}
+
++getMaxMana() : int {query}
+
++getNumUnlockedSkills() : int {query}
+
++getXP() : int {query}
+
+-gold : int
+
+-mana : int
+
+-modifierCapacity : int
+
+-numUnlockedSkills : int
+
+-skillCapacity : int
+
+-xp : int
+
++addGold(int val) : void
+
++addSkill(Skill* skill) : void
+
++addXP(int x) : void
+
++applyModifier(StatModifier mod) : void
+
++attack(Entity* target) : void
+
++castSpell(int index, Entity* target) : void
+
++clearModifiers() : void
+
++deductGold(int cost) : void
+
++deserialize(const json& j) : void
+
++equip(Equippable* item) : void
+
++healHP(int val) : void
+
++loadGameState(const std::string& filename) : void
+
++restoreMana(int amount) : void
+
++saveGameState(const std::string& filename) : void
+
++serialize(json& j) : void {query}
+
++setEquippedArmor(Armor* a) : void
+
++setEquippedWeapon(Weapon* w) : void
+
++setGold(int val) : void
+
++setInventory(Inventory* inv) : void
+
++setSpellbook(Spellbook* sb) : void
+
++setXP(int val) : void
+
++takeDamage(int amount) : void
+
++takeTurn(Entity*) : void
+
++useItem(int index) : void
+
+}
+
+
+
+
+
+abstract class Room {
+
++Room(string text, string roomType)
+
++~Room()
+
++getIsCleared() : bool
+
+#isCleared : bool
+
++isSaveRoom() : bool {query}
+
+#narrativeText : string
+
+#roomType : string
+
++deserialize(const json& j) : void
+
++enter(Player*) : void
+
++{abstract} interact(Player* player) : void
+
++serialize(json& j) : void {query}
+
+}
+
+
+
+
+
+class SaveRoom {
+
++SaveRoom(string text, Store* store)
+
++~SaveRoom()
+
+-campfirePos : Coordinate
+
+-doorPos : Coordinate
+
+-localPlayer : Coordinate
+
+-merchantPos : Coordinate
+
+-typewriterPos : Coordinate
+
+-store : Store*
+
+-isAdjacent(Coordinate a, Coordinate b) : bool
+
+-roomHeight : int
+
+-roomWidth : int
+
++interact(Player* player) : void
+
+-render() : void
+
+}
+
+
+
+
+
+class ScalingSkill {
+
++ScalingSkill()
+
++ScalingSkill(std::string name, int requiredLevel, float multiplier, StatModifier baseModifier)
+
+-baseModifier : StatModifier
+
++getBaseModifier() : StatModifier {query}
+
++getMultiplier() : float {query}
+
+-multiplier : float
+
++getType() : std::string {query}
+
++activate(Player* target) : void
+
++deserialize(const json& j) : void
+
++serialize(json& j) : void {query}
+
++setBaseModifier(StatModifier baseModifier) : void
+
++setMultiplier(float multiplier) : void
+
+}
+
+
+
+
+
+abstract class Serializable {
+
++~Serializable()
+
++{abstract} deserialize(json j) : void
+
++{abstract} serialize(json j) : void {query}
+
+}
+
+
+
+
+
+abstract class Skill {
+
++Skill()
+
++Skill(std::string name, int requiredLevel)
+
++~Skill()
+
++getRequiredLevel() : int {query}
+
+#requiredLevel : int
+
++operator<<(std::ostream& out, const Skill& skill) : std :: ostream&
+
++getName() : std::string {query}
+
++{abstract} getType() : std::string {query}
+
+#name : std::string
+
++{abstract} activate(Player* target) : void
+
++deserialize(const json& j) : void
+
++serialize(json& j) : void {query}
+
++setName(std::string name) : void
+
++setRequiredLevel(int requiredLevel) : void
+
+}
+
+
+
+
+
+class SkillManager {
+
+-SkillManager()
+
++~SkillManager()
+
++getSkill(int id) : Skill* {query}
+
+-skills : Skill**
+
++{static} getInstance() : SkillManager*
+
++learnSkill(Skill* skill) : bool
+
++unlock(Player* player, int id) : bool
+
+-capacity : int
+
++getCapacity() : int {query}
+
++getNumSkills() : int {query}
+
+-numSkills : int
+
+-{static} instance : static SkillManager*
+
++clearSkills() : void
+
++deserialize(const json& j) : void
+
++{static} destroyInstance() : void
+
++loadFromJson(const std::string& fileName) : void
+
++resize() : void
+
++saveToJson(const std::string& fileName) : void {query}
+
++serialize(json& j) : void {query}
+
++showSkills() : void {query}
+
+}
+
+
+
+
+
+class SkillRules {
+
++{static} defaultSkillCapacity : static int
+
++{static} maxSkillPoints : static int
+
++{static} maxUnlockedSkills : static int
+
+}
+
+
+
+
+
+abstract class Spell {
+
++Spell(std::string n, int m)
+
++~Spell()
+
++getManaCost() : int {query}
+
+#manaCost : int
+
++{static} globalManaTax : static float
+
++getName() : std::string {query}
+
+#name : std::string
+
++{abstract} cast(Entity* caster, Entity* target) : void
+
++deserialize(const json& j) : void
+
++{abstract} effect(Entity* caster, Entity* target) : void
+
++serialize(json& j) : void {query}
+
+}
+
+
+
+
+
+class Spellbook {
+
++Spellbook()
+
++~Spellbook()
+
+-spells : DynamicArray<Spell*>
+
++getSpell(int index) : Spell*
+
++addSpell(Spell* s) : void
+
++deserialize(const json& j) : void
+
++display() : void {query}
+
++removeSpell(int index) : void
+
++serialize(json& j) : void {query}
+
++viewSpells() : void {query}
+
+}
+
+
+
+
+
+class StatModifier {
+
++StatModifier()
+
++StatModifier(StatType stat, int value)
+
++StatModifier(StatType type, int val, int turns)
+
++operator+(const StatModifier& other) : StatModifier {query}
+
++stat : StatType
+
++duration : int
+
++getDuration() : int {query}
+
++getStatType() : int {query}
+
++getValue() : int {query}
+
++value : int
+
++operator<<(std::ostream& out, const StatModifier& mod) : std :: ostream&
+
++getStatName() : std::string {query}
+
++decreaseDuration() : void
+
++from_json(const json& j, StatModifier& modifier) : void
+
++setDuration(int turns) : void
+
++setStatType(StatType type) : void
+
++setValue(int val) : void
+
++to_json(json& j, const StatModifier& modifier) : void
+
+}
+
+
+
+
+
+class StatusEffect {
+
++StatusEffect()
+
++StatusEffect(StatusType t, int d, int tv)
+
+-type : StatusType
+
++duration : int
+
++getDuration() : int {query}
+
++getType() : int {query}
+
+-tickValue : int
+
++apply(Entity* target) : void
+
++tick(Entity* target) : void
+
+}
+
+
+
+
+
+class Store {
+
++Store(int cap)
+
++~Store()
+
+-storeInventory : Item**
+
+-capacity : int
+
+-numStoreItems : int
+
++buy(Player* player, int itemIndex) : void
+
+-grow() : void
+
++openInterface(Player* player) : void
+
++sell(Player* player, int itemIndex) : void
+
+-sortStoreInventory() : void
+
++stockItem(Item* item) : void
+
+}
+
+
+
+
+
+class Sword {
+
++Sword(const std::string& name, int baseDamage, float lifeStealRatio, int value)
+
++Sword(const Sword& other)
+
++getLifeStealRatio() : float {query}
+
+-lifeStealRatio : float
+
++getType() : std::string {query}
+
++deserialize(const nlohmann::json& j) : void
+
++onEquip(Player* target) : void
+
++serialize(nlohmann::json& j) : void {query}
+
+}
+
+
+
+
+
+class Weapon {
+
++Weapon(const std::string& name, int baseDamage, int value, int maxDurability)
+
++Weapon(const Weapon& other)
+
+#baseDamage : int
+
++getBaseDamage() : int {query}
+
++getType() : std::string {query}
+
++deserialize(const json& j) : void
+
++onEquip(Player* target) : void
+
++onHit() : void
+
++onUnequip(Player* target) : void
+
++serialize(json& j) : void {query}
+
++setBaseDamage(int d) : void
+
+}
+
+
+
+
+
+class WorldGenerator {
+
+-WorldGenerator()
+
+-spawnRandomEnemy() : Enemy*
+
++generateMap(int w, int h) : MapGrid*
+
++createStockedStore() : Store*
+
++{static} getInstance() : WorldGenerator*
+
+-{static} instance : static WorldGenerator*
+
++placeRooms(MapGrid* map) : void
+
+}
+
+
+
+
+
+class WorldRules {
+
++{static} mapHeight : inline static int
+
++{static} mapWidth : inline static int
+
++{static} worldSeed : inline static int
+
+}
+
+
+
+
+
+enum MaterialType {
+
+CRYSTAL
+
+IRON
+
+WOOD
+
+}
+
+
+
+
+
+enum StatType {
+
+DAMAGE
+
+DEFENSE
+
+NONE
+
+}
+
+
+
+
+
+enum StatusType {
+
+BURN
+
+FREEZE
+
+POISON
+
+}
+
+
+
+
+
+class Coordinate {
+
++operator+(const Coordinate& other) : Coordinate {query}
+
++operator!=(const Coordinate& other) : bool {query}
+
++operator==(const Coordinate& other) : bool {query}
+
++x : int
+
++y : int
+
++operator<<(std::ostream& os, const Coordinate& coord) : std :: ostream&
+
+}
+
+
+
+
+
+
+
+
+
+
+
+/' Inheritance relationships '/
+
+
+
+Armor <|-- ChainMail
+
+
+
+
+
+Armor <|-- PlateArmor
+
+
+
+
+
+Consumable <|-- DamagePotion
+
+
+
+
+
+Consumable <|-- DefensePotion
+
+
+
+
+
+Consumable <|-- HealthPotion
+
+
+
+
+
+Consumable <|-- ManaPotion
+
+
+
+
+
+Enemy <|-- Boss
+
+
+
+
+
+Enemy <|-- Goblin
+
+
+
+
+
+Enemy <|-- Knight
+
+
+
+
+
+Entity <|-- Enemy
+
+
+
+
+
+Entity <|-- Player
+
+
+
+
+
+Equippable <|-- Armor
+
+
+
+
+
+Equippable <|-- Weapon
+
+
+
+
+
+Item <|-- Consumable
+
+
+
+
+
+Item <|-- Equippable
+
+
+
+
+
+Item <|-- Material
+
+
+
+
+
+Room <|-- CombatRoom
+
+
+
+
+
+Room <|-- EmptyRoom
+
+
+
+
+
+Room <|-- SaveRoom
+
+
+
+
+
+Serializable <|-- Entity
+
+
+
+
+
+Serializable <|-- Inventory
+
+
+
+
+
+Serializable <|-- Item
+
+
+
+
+
+Serializable <|-- MapGrid
+
+
+
+
+
+Serializable <|-- Room
+
+
+
+
+
+Serializable <|-- Skill
+
+
+
+
+
+Serializable <|-- SkillManager
+
+
+
+
+
+Serializable <|-- Spell
+
+
+
+
+
+Serializable <|-- Spellbook
+
+
+
+
+
+Skill <|-- ActiveSkill
+
+
+
+
+
+Skill <|-- PassiveSkill
+
+
+
+
+
+Skill <|-- ScalingSkill
+
+
+
+
+
+Spell <|-- DamageSpell
+
+
+
+
+
+Spell <|-- HealingSpell
+
+
+
+
+
+Weapon <|-- Axe
+
+
+
+
+
+Weapon <|-- Dagger
+
+
+
+
+
+Weapon <|-- Sword
+
+
+
+
+
+
+
+
+
+
+
+/' Aggregation relationships '/
+
+
+
+ActiveSkill *-- StatModifier
+
+
+
+
+
+BattleManager o-- BattleManager
+
+
+
+
+
+BattleManager *-- DynamicArray
+
+
+
+
+
+BattleManager o-- Player
+
+
+
+
+
+CombatRoom "2" *-- Coordinate
+
+
+
+
+
+CombatRoom o-- Enemy
+
+
+
+
+
+CombatRoom o-- Item
+
+
+
+
+
+DamageSpell *-- StatusType
+
+
+
+
+
+DropEntry o-- Item
+
+
+
+
+
+EmptyRoom "2" *-- Coordinate
+
+
+
+
+
+Enemy o-- LootTable
+
+
+
+
+
+Enemy o-- StatModifier
+
+
+
+
+
+Enemy o-- StatusEffect
+
+
+
+
+
+Entity *-- HealthBar
+
+
+
+
+
+GameState o-- GameState
+
+
+
+
+
+GameState o-- MapGrid
+
+
+
+
+
+GameState o-- Player
+
+
+
+
+
+Inventory *-- DynamicArray
+
+
+
+
+
+LootBundle *-- DynamicArray
+
+
+
+
+
+LootTable o-- DropEntry
+
+
+
+
+
+MapGrid *-- Coordinate
+
+
+
+
+
+MapGrid *-- Grid
+
+
+
+
+
+Material *-- MaterialType
+
+
+
+
+
+PassiveSkill *-- StatModifier
+
+
+
+
+
+Player o-- Armor
+
+
+
+
+
+Player "2" *-- DynamicArray
+
+
+
+
+
+Player o-- Inventory
+
+
+
+
+
+Player o-- Spellbook
+
+
+
+
+
+Player o-- Weapon
+
+
+
+
+
+SaveRoom "5" *-- Coordinate
+
+
+
+
+
+SaveRoom o-- Store
+
+
+
+
+
+ScalingSkill *-- StatModifier
+
+
+
+
+
+SkillManager o-- Skill
+
+
+
+
+
+SkillManager o-- SkillManager
+
+
+
+
+
+Spellbook *-- DynamicArray
+
+
+
+
+
+StatModifier *-- StatType
+
+
+
+
+
+StatusEffect *-- StatusType
+
+
+
+
+
+Store o-- Item
+
+
+
+
+
+WorldGenerator o-- WorldGenerator
+
+
+
+
+
+
+
+
+
+
+
+
+
+/' Nested objects '/
+
+
+
+
+
+
+
+@enduml 
+
+Here
